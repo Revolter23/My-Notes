@@ -9,7 +9,7 @@ export default function AuthLayout({
 	return (
 		<>
 			<Navbar />
-			<main className="min-h-dvh">{children}</main>
+			<main>{children}</main>
 			<Footer />
 		</>
 	);

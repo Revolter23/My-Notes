@@ -26,11 +26,17 @@ async function seedNotes() {
 	return insertedNotes;
 }
 
+async function userTables() {
+	const result = await sql.file("./app/seed/query.sql");
+
+	return result;
+}
+
 export async function GET() {
 	try {
-		await seedNotes();
+		const data = await userTables();
 
-		return Response.json({ message: "Database seeded successfully" });
+		return Response.json({ message: "Database seeded successfully", data });
 	} catch (error) {
 		return Response.json({ error }, { status: 500 });
 	}
