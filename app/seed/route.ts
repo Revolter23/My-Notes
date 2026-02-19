@@ -1,25 +1,21 @@
 import postgres from "postgres";
-import { notes } from "../_lib/note-data";
+import { notes } from "@/app/_lib/note-data";
+import { cookies } from "next/headers";
+import { decrypt } from "@/app/_lib/session";
 
 const sql = postgres(process.env.POSTGRES_URL!, { ssl: "require" });
 
 async function seedNotes() {
-	await sql`
-    CREATE TABLE IF NOT EXISTS notes (
-        id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-        title VARCHAR(255) NOT NULL,
-        content TEXT NOT NULL,
-        date DATE NOT NULL
-    );
-  `;
+	const session = (await cookies()).get("session")?.value;
+	const payload = await decrypt(session);
 
 	const insertedNotes = await Promise.all(
 		notes.map(
 			(note) => sql`
-        INSERT INTO notes (title, content, date)
-        VALUES (${note.title}, ${note.content}, ${note.date})
-        ON CONFLICT (id) DO NOTHING;
-      `,
+	    INSERT INTO notes (title, content, date, userid)
+	    VALUES (${note.title}, ${note.content}, ${note.date}, ${payload!.userId})
+	    ON CONFLICT (id) DO NOTHING;
+	  `,
 		),
 	);
 
@@ -34,7 +30,7 @@ async function userTables() {
 
 export async function GET() {
 	try {
-		const data = await userTables();
+		const data = await seedNotes();
 
 		return Response.json({ message: "Database seeded successfully", data });
 	} catch (error) {

@@ -6,7 +6,7 @@ import { usePathname, useParams } from "next/navigation";
 import { useState } from "react";
 import Image from "next/image";
 import PexelImage from "@/public/pexels-image.jpg";
-import Breadcrumbs from "@/app/(notes)/[id]/_components/breadcrumbs";
+import Breadcrumbs from "@/app/notes/[id]/_components/breadcrumbs";
 import { deleteNote } from "@/app/_lib/actions";
 
 export default function IdLayout({ children }: { children: React.ReactNode }) {
@@ -20,11 +20,11 @@ export default function IdLayout({ children }: { children: React.ReactNode }) {
 		{ label: "Notes", href: "/" },
 		{
 			label: "View Note",
-			href: `/${id}`,
+			href: `/notes/${id}`,
 			active: pathname.endsWith(`/${id}`),
 		},
 		...(pathname.endsWith("/edit")
-			? [{ label: "Edit Note", href: `/${id}/edit`, active: true }]
+			? [{ label: "Edit Note", href: `/notes/${id}/edit`, active: true }]
 			: []),
 	];
 
@@ -40,7 +40,7 @@ export default function IdLayout({ children }: { children: React.ReactNode }) {
 				<div className="flex justify-between items-center">
 					<Breadcrumbs breadcrumbs={breadcrumbs} />
 					<div className="flex gap-4">
-						<Link href={`/${id}/edit`}>
+						<Link href={`/notes/${id}/edit`}>
 							<button
 								className={clsx(
 									"bg-white text-black px-5 py-2 rounded-lg cursor-pointer",

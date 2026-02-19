@@ -1,5 +1,5 @@
-import Navbar from "@/app/(notes)/_components/Navbar";
-import Footer from "@/app/(notes)/_components/Footer";
+import Navbar from "@/app/notes/_components/Navbar";
+import Footer from "@/app/notes/_components/Footer";
 
 export default function AuthLayout({
 	children,

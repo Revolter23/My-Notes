@@ -1,12 +1,11 @@
 "use client";
 
-import { signupUser } from "@/app/_lib/actions";
+import { authenticate } from "@/app/_lib/actions";
 import Link from "next/link";
 import { useActionState, useState } from "react";
 
-export default function SignupPage() {
+export default function LoginPage() {
 	const [userData, setUserData] = useState({
-		name: "",
 		email: "",
 		password: "",
 	});
@@ -16,40 +15,16 @@ export default function SignupPage() {
 		setUserData((prev) => ({ ...prev, [name]: value }));
 	}
 
-	const initialState = {
-		message: "",
-		errors: { name: [], email: [], password: [] },
-	};
+	const initialState = { errors: { email: [], password: [] }, message: "" };
 	const [state, formAction, isPending] = useActionState(
-		signupUser,
+		authenticate,
 		initialState,
 	);
 	return (
 		<div className="flex flex-col min-h-150 w-full items-center justify-center p-10">
 			<div className="w-[90%] max-w-md border border-gray-700 bg-white text-black rounded-xl px-10 py-20">
-				<h1 className="text-2xl mb-4">Sign Up</h1>
+				<h1 className="text-2xl mb-4">Login</h1>
 				<form action={formAction} className="flex flex-col gap-4">
-					<label className="flex flex-col">
-						<span>Full Name</span>
-						<input
-							name="name"
-							type="text"
-							className="mt-1 py-2 px-4 rounded-xl border border-gray-600"
-							placeholder="Enter your Name"
-							value={userData.name}
-							onChange={handleChange}
-						/>
-						{state?.errors?.name &&
-							state.errors.name.map((errorMsg: string) => (
-								<p
-									className="text-red-500 text-sm mt-1"
-									key={errorMsg}
-								>
-									{errorMsg}
-								</p>
-							))}
-					</label>
-
 					<label className="flex flex-col">
 						<span>Email</span>
 						<input
@@ -97,12 +72,12 @@ export default function SignupPage() {
 						disabled={isPending}
 						className="bg-black text-white py-2 rounded-xl mt-6"
 					>
-						{isPending ? "Signing up..." : "Sign Up"}
+						{isPending ? "Logging in..." : "Login"}
 					</button>
 				</form>
 
 				<div className="mt-8 text-sm">
-					<Link href="/authhome" className="text-gray-600">
+					<Link href="/" className="text-gray-600">
 						Back
 					</Link>
 				</div>

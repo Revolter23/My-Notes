@@ -2,11 +2,16 @@
 
 import * as z from "zod";
 import sql from "./db";
-// import { auth } from "@/app/_lib/auth";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
-// import { headers } from "next/headers";
 import bcrypt from "bcrypt";
+import { User } from "@/app/_lib/definitions";
+import {
+	createSession,
+	deleteSession,
+	updateSession,
+} from "@/app/_lib/session";
+import { verifySession } from "@/app/_lib/dal";
 
 const NoteSchema = z.object({
 	id: z.string(),
@@ -34,7 +39,7 @@ const UserSchema = z.object({
 		.max(128, "Password is too long"),
 });
 
-// const LoginUser = UserSchema.omit({ name: true });
+const LoginUser = UserSchema.omit({ name: true });
 
 const CreateNote = NoteSchema.omit({ id: true });
 const UpdateNote = NoteSchema.omit({ id: true });
@@ -65,6 +70,9 @@ export type State = {
 };
 
 export async function createNote(prevState: State, formData: FormData) {
+	const session = await verifySession();
+	if (!session) return null;
+
 	const validation = CreateNote.safeParse({
 		title: formData.get("title"),
 		content: formData.get("content"),
@@ -82,8 +90,8 @@ export async function createNote(prevState: State, formData: FormData) {
 	const date = new Date().toISOString();
 	try {
 		await sql`
-			INSERT INTO notes (title, content, date)
-			VALUES (${title}, ${content}, ${date})
+			INSERT INTO notes (title, content, date, userid)
+			VALUES (${title}, ${content}, ${date}, ${session.userId})
   		`;
 	} catch (error) {
 		console.error("Error creating note:", error);
@@ -92,8 +100,8 @@ export async function createNote(prevState: State, formData: FormData) {
 		};
 	}
 
-	revalidatePath("/");
-	redirect("/");
+	revalidatePath("/notes");
+	redirect("/notes");
 }
 
 export async function updateNote(
@@ -101,6 +109,9 @@ export async function updateNote(
 	prevState: State,
 	formData: FormData,
 ) {
+	const session = await verifySession();
+	if (!session) return null;
+
 	const validation = UpdateNote.safeParse({
 		title: formData.get("title"),
 		content: formData.get("content"),
@@ -129,11 +140,14 @@ export async function updateNote(
 		};
 	}
 
-	revalidatePath(`/${id}`);
-	redirect(`/${id}`);
+	revalidatePath(`/notes/${id}`);
+	redirect(`/notes/${id}`);
 }
 
 export async function deleteNote(id: string) {
+	const session = await verifySession();
+	if (!session) return null;
+
 	try {
 		await sql`
 			DELETE FROM notes
@@ -146,44 +160,9 @@ export async function deleteNote(id: string) {
 		};
 	}
 
-	revalidatePath("/");
-	redirect("/");
+	revalidatePath("/notes");
+	redirect("/notes");
 }
-
-// export async function loginUser(prevState: UserState, formData: FormData) {
-// 	const validation = LoginUser.safeParse({
-// 		email: formData.get("email"),
-// 		password: formData.get("password"),
-// 	});
-
-// 	if (!validation.success) {
-// 		return {
-// 			errors: validation.error.flatten().fieldErrors,
-// 			message:
-// 				"Missing or invalid fields. Please correct the errors and try again.",
-// 		};
-// 	}
-
-// 	const { email, password } = validation.data;
-
-// 	try {
-// 		const data = await auth.api.signInEmail({
-// 			body: {
-// 				email,
-// 				password, // required
-// 				rememberMe: true,
-// 				callbackURL: "/",
-// 			},
-// 			// This endpoint requires session cookies.
-// 			headers: await headers(),
-// 		});
-// 		console.log(data);
-// 	} catch (error) {
-// 		if (error instanceof APIError) {
-// 			console.log(error.message, error.status);
-// 		}
-// 	}
-// }
 
 export async function signupUser(prevState: SignUpState, formData: FormData) {
 	const validation = UserSchema.safeParse({
@@ -201,6 +180,7 @@ export async function signupUser(prevState: SignUpState, formData: FormData) {
 	}
 
 	const { name, email, password } = validation.data;
+	let redirectPath: string | null = null;
 
 	try {
 		const hashedPassword = await bcrypt.hash(password, 10);
@@ -210,22 +190,98 @@ export async function signupUser(prevState: SignUpState, formData: FormData) {
 		RETURNING userid
 		`;
 
-		console.log(newuser);
-
 		if (newuser.length === 0) {
 			return {
 				message: "Invalid User Credentials",
 			};
 		}
+
+		await createSession(newuser[0].userid);
+		redirectPath = "/notes";
 	} catch (error) {
 		if (error.code === "23505") {
 			return {
 				message: "Invalid User Credentials",
 			};
 		} else {
-			console.log(error);
+			console.error(error);
+		}
+	} finally {
+		if (redirectPath) {
+			revalidatePath("/notes");
+			redirect(redirectPath);
 		}
 	}
+}
 
-	revalidatePath("/");
+async function getUser(email: string) {
+	try {
+		const user = await sql<
+			User[]
+		>`SELECT * FROM users WHERE email = ${email}`;
+		return user[0];
+	} catch (error) {
+		console.error(error);
+	}
+}
+
+export async function authenticate(prevState: UserState, formData: FormData) {
+	const parsedCredentials = LoginUser.safeParse({
+		email: formData.get("email"),
+		password: formData.get("password"),
+	});
+
+	if (!parsedCredentials.success) {
+		return {
+			errors: parsedCredentials.error.flatten().fieldErrors,
+			message:
+				"Missing or invalid fields. Please correct the errors and try again.",
+		};
+	}
+
+	const { email, password } = parsedCredentials.data;
+	let redirectPath: string | null = null;
+
+	try {
+		const user = await getUser(email);
+		// console.log(user);
+
+		if (!user) {
+			const e = new Error("Invalid Credentials");
+			e.name = "AuthError";
+			throw e;
+		}
+
+		const passwordMatch = await bcrypt.compare(password, user.password);
+
+		if (!passwordMatch) {
+			const e = new Error("Invalid Credentials");
+			e.name = "AuthError";
+			throw e;
+		}
+
+		await updateSession(user.userid);
+		redirectPath = "/notes";
+	} catch (error) {
+		if ((error.name = "AuthError")) {
+			switch (error.name) {
+				case "AuthError":
+					return { message: "Invalid credentials." };
+				default:
+					return { message: "Something went wrong." };
+			}
+		} else {
+			console.error(error);
+		}
+	} finally {
+		if (redirectPath) {
+			revalidatePath("/notes");
+			redirect(redirectPath);
+		}
+	}
+}
+
+export async function singoutHandler() {
+	await deleteSession();
+	redirect("/");
 }

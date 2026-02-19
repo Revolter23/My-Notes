@@ -1,5 +1,5 @@
-import CardSkeleton from "@/app/(notes)/_components/CardSkeleton";
-import AddIconLogo from "@/app/(notes)/_components/AddIconLogo";
+import CardSkeleton from "@/app/notes/_components/CardSkeleton";
+import AddIconLogo from "@/app/notes/_components/AddIconLogo";
 import Link from "next/link";
 
 export default function Page() {
@@ -10,7 +10,7 @@ export default function Page() {
 					<CardSkeleton key={index} />
 				))}
 			</div>
-			<Link href="/new-note">
+			<Link href="notes/new-note">
 				<AddIconLogo />
 			</Link>
 		</section>

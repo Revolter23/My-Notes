@@ -1,4 +1,4 @@
-import Navbar from "@/app/(notes)/_components/Navbar";
+import Navbar from "@/app/notes/_components/Navbar";
 import Footer from "./_components/Footer";
 
 export default function NotesLayout({

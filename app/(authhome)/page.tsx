@@ -19,7 +19,7 @@ export default function AuthPage() {
 				<div className="flex flex-col gap-4 basis-1/3">
 					<h1>Please log in or sign up to continue.</h1>
 					<p>If you already have an account, please log in.</p>
-					<Link href="authhome/login">
+					<Link href="/login">
 						<button className="bg-white text-black px-4 py-2 rounded-xl cursor-pointer">
 							Login
 						</button>
@@ -28,7 +28,7 @@ export default function AuthPage() {
 						If you are new here, please sign up to create an
 						account.
 					</p>
-					<Link href="authhome/sign-up">
+					<Link href="/sign-up">
 						<button className="bg-white text-black px-4 py-2 rounded-xl cursor-pointer">
 							Sign Up
 						</button>
