@@ -1,36 +1,84 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Notes App
+
+A modern, full-stack notes application built with Next.js that allows users to perform Create, Read, Update, and Delete (CRUD) operations on their personal notes. The app features user authentication, secure session management, and a responsive design using Material-UI and Tailwind CSS.
+
+## Features
+
+- **User Authentication**: Secure login and sign-up functionality with encrypted passwords and JWT-based sessions
+- **CRUD Operations**: Create new notes, view existing notes in a card-based dashboard, edit notes with a rich form interface, and delete notes
+- **Responsive Design**: Mobile-friendly interface with a clean, modern UI
+- **Database Integration**: PostgreSQL database for reliable data storage and querying
+- **Session Management**: Secure cookie-based sessions with automatic redirects for authenticated/unauthenticated users
+
+## Tech Stack
+
+- **Frontend**: Next.js 16 with React 19, TypeScript
+- **Styling**: Material-UI (MUI) with Tailwind CSS
+- **Backend**: Next.js API routes with PostgreSQL
+- **Authentication**: Custom JWT implementation with bcrypt for password hashing
+- **Database**: PostgreSQL with the `postgres` library for queries
+- **Development Tools**: ESLint, TypeScript
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+- Node.js (version 18 or higher)
+- pnpm package manager
+- PostgreSQL database
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Installation
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+1. Clone the repository and navigate to the notes-app directory:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+    ```bash
+    cd notes-app
+    ```
+
+2. Install dependencies:
+
+    ```bash
+    pnpm install
+    ```
+
+3. Set up your PostgreSQL database and create a `.env.local` file in the root directory with your database connection string:
+
+    ```
+    POSTGRES_URL=your_postgresql_connection_string_here
+    ```
+
+4. Create the necessary database tables by running the SQL script in `app/seed/query.sql` against your PostgreSQL database.
+
+5. Start the development server:
+
+    ```bash
+    pnpm dev
+    ```
+
+6. Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+### Seeding the Database (Optional)
+
+To populate the database with sample notes, visit `http://localhost:3000/seed` after logging in. This will insert sample data for the authenticated user.
+
+## Usage
+
+1. **Sign Up/Login**: Create an account or log in with existing credentials
+2. **Dashboard**: View all your notes in a grid layout
+3. **Create Note**: Click the add icon to create a new note
+4. **Edit Note**: Click on any note card to view and edit its content
+5. **Delete Note**: Use the delete option within the note editor
+
+## Project Structure
+
+- `app/` - Next.js app directory with pages and API routes
+- `app/_lib/` - Database access layer and utility functions
+- `app/(authhome)/` - Authentication-related pages
+- `app/notes/` - Notes management pages and components
+- `public/` - Static assets
 
 ## Learn More
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- [Next.js Documentation](https://nextjs.org/docs)
+- [PostgreSQL Documentation](https://www.postgresql.org/docs/)
+- [Material-UI Documentation](https://mui.com/)
