@@ -1,6 +1,6 @@
 import { Note } from "@/app/_lib/definitions";
 
-export const notes: Note[] = [
+export const notes: Omit<Note, "userid">[] = [
 	{
 		id: "1",
 		title: "Getting Started with TypeScript",

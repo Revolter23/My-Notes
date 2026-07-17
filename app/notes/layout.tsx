@@ -1,16 +1,20 @@
-import Navbar from "@/app/notes/_components/Navbar";
-import Footer from "./_components/Footer";
+import { getNotes } from "@/app/_lib/getData";
+import { verifySession } from "@/app/_lib/dal";
+import NotesLayoutClient from "@/app/notes/_components/NotesLayoutClient";
 
-export default function NotesLayout({
+export default async function NotesLayout({
 	children,
 }: {
 	children: React.ReactNode;
 }) {
+	const session = await verifySession();
+	if (!session) return null;
+
+	const notes = (await getNotes()) || [];
+
 	return (
-		<>
-			<Navbar />
-			<main className="min-h-dvh">{children}</main>
-			<Footer />
-		</>
+		<NotesLayoutClient notes={notes}>
+			{children}
+		</NotesLayoutClient>
 	);
 }

@@ -13,7 +13,7 @@ async function seedNotes() {
 		notes.map(
 			(note) => sql`
 	    INSERT INTO notes (title, content, date, userid)
-	    VALUES (${note.title}, ${note.content}, ${note.date}, ${payload!.userId})
+	    VALUES (${note.title}, ${note.content}, ${note.date}, ${payload!.userId as string})
 	    ON CONFLICT (id) DO NOTHING;
 	  `,
 		),

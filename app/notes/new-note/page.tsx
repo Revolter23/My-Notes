@@ -2,31 +2,40 @@
 
 import { useActionState, useState } from "react";
 import clsx from "clsx";
-import { createNote } from "@/app/_lib/actions";
+import { createNote, State } from "@/app/_lib/actions";
+import Link from "next/link";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 
 export default function Page() {
-	const initialState = {
+	const initialState: State = {
 		message: "",
 		errors: {},
 	};
 	const [state, formAction, isPending] = useActionState(
-		createNote,
+		createNote as any,
 		initialState,
 	);
 	const [charCount, setCharCount] = useState(0);
 
 	return (
-		<div className="flex flex-col items-center min-h-dvh bg-gray-100 py-16">
-			<div className="bg-white rounded-xl shadow-lg px-10 py-14 w-full max-w-md">
-				<h1 className="text-3xl font-medium mb-6 text-gray-700">
-					Create New Note
-				</h1>
+		<div className="p-8 h-full flex flex-col bg-white">
+			<div className="flex flex-col flex-1 w-full mx-auto">
+				{/* Header */}
+				<div className="flex items-center gap-3 border-b border-slate-100 pb-4 mb-6 pr-14">
+					<Link href="/notes" className="text-slate-400 hover:text-slate-600 transition">
+						<ArrowBackIcon fontSize="small" />
+					</Link>
+					<h1 className="text-xl font-bold text-slate-900">
+						Create New Note
+					</h1>
+				</div>
 
-				<form action={formAction} className="space-y-4">
-					<div>
+				<form action={formAction} className="flex flex-col flex-1 gap-5">
+					{/* Title */}
+					<div className="flex flex-col gap-1">
 						<label
 							htmlFor="title"
-							className="block text-sm font-medium text-gray-700 mb-2"
+							className="text-sm font-semibold text-slate-700"
 						>
 							Title
 						</label>
@@ -34,24 +43,24 @@ export default function Page() {
 							id="title"
 							name="title"
 							type="text"
+							maxLength={100}
 							onChange={(e) =>
 								setCharCount(e.target.value.length)
 							}
 							className={clsx(
-								"w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 transition",
-								state.errors?.title
-									? "border-red-500 bg-red-50 focus:ring-red-500"
-									: "border-gray-300 focus:ring-blue-500",
+								"w-full px-4 py-2.5 border border-slate-200 rounded-xl bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition text-slate-800 font-semibold",
+								state.errors?.title && "border-red-500 focus:ring-red-500/25 focus:border-red-500"
 							)}
 							placeholder="Enter note title"
+							required
 						/>
-						<span className="text-sm font-semibold text-gray-500 mt-1 block">
+						<span className="text-xs text-slate-400 text-right mt-1 font-medium">
 							{charCount} / 100
 						</span>
 						{state.errors?.title &&
 							state.errors.title.map((errorMsg: string) => (
 								<p
-									className="text-red-500 text-sm mt-1"
+									className="text-red-500 text-xs font-semibold mt-1"
 									key={errorMsg}
 								>
 									{errorMsg}
@@ -59,29 +68,28 @@ export default function Page() {
 							))}
 					</div>
 
-					<div>
+					{/* Content */}
+					<div className="flex flex-col flex-1 gap-1.5 min-h-[250px]">
 						<label
 							htmlFor="content"
-							className="block text-sm font-medium text-gray-700 mb-2"
+							className="text-sm font-semibold text-slate-700"
 						>
 							Content
 						</label>
 						<textarea
 							id="content"
 							name="content"
-							rows={6}
 							className={clsx(
-								"w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 transition resize-none",
-								state.errors?.content
-									? "border-red-500 bg-red-50 focus:ring-red-500"
-									: "border-gray-300 focus:ring-blue-500",
+								"w-full flex-1 px-4 py-3 border border-slate-200 rounded-xl bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition text-slate-600 resize-none leading-relaxed",
+								state.errors?.content && "border-red-500 focus:ring-red-500/25 focus:border-red-500"
 							)}
-							placeholder="Enter note content"
+							placeholder="Enter note content..."
+							required
 						/>
 						{state.errors?.content &&
 							state.errors?.content.map((errorMsg: string) => (
 								<p
-									className="text-red-500 text-sm mt-1"
+									className="text-red-500 text-xs font-semibold mt-1"
 									key={errorMsg}
 								>
 									{errorMsg}
@@ -89,17 +97,28 @@ export default function Page() {
 							))}
 					</div>
 
-					<button
-						type="submit"
-						disabled={isPending}
-						className="w-full bg-lime-400 hover:bg-lime-500 disabled:bg-gray-400 text-white font-medium py-2 px-4 rounded-full transition"
-					>
-						{isPending ? "Creating..." : "Create Note"}
-					</button>
+					{/* Action Buttons */}
+					<div className="flex justify-end gap-3 pt-4 border-t border-slate-100 mt-auto">
+						<Link href="/notes">
+							<button
+								type="button"
+								className="px-5 py-2.5 rounded-full border border-slate-200 text-slate-600 hover:bg-slate-50 text-sm font-semibold transition cursor-pointer"
+							>
+								Cancel
+							</button>
+						</Link>
+						<button
+							type="submit"
+							disabled={isPending}
+							className="bg-emerald-500 hover:bg-emerald-600 disabled:bg-slate-300 text-white text-sm font-semibold px-6 py-2.5 rounded-full transition shadow-sm cursor-pointer"
+						>
+							{isPending ? "Creating..." : "Create Note"}
+						</button>
+					</div>
 
 					{state.message && (
 						<p
-							className="text-red-500 text-sm text-center"
+							className="text-red-500 text-sm text-center font-semibold bg-red-50 p-2.5 rounded-xl"
 							key={state.message}
 						>
 							{state.message}

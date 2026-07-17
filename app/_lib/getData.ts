@@ -9,7 +9,7 @@ export async function getNotes() {
 	try {
 		const notes = await sql<
 			Note[]
-		>`SELECT * FROM notes WHERE userid = ${session.userId} ORDER BY date DESC`;
+		>`SELECT * FROM notes WHERE userid = ${session.userId as string} ORDER BY date DESC`;
 		return notes;
 	} catch (error) {
 		console.error("Error fetching notes:", error);

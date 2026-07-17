@@ -53,7 +53,7 @@ export async function updateSession(userId: string) {
 		return;
 	}
 
-	const payload: SessionPayload = await decrypt(session);
+	const payload = (await decrypt(session)) as SessionPayload;
 
 	if (!payload?.userId) {
 		await deleteSession();

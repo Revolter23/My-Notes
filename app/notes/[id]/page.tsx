@@ -1,12 +1,17 @@
 import { getNotebyId } from "@/app/_lib/getData";
+import NoteDetailCard from "@/app/notes/_components/NoteDetailCard";
 
 export default async function Page(props: { params: Promise<{ id: string }> }) {
 	const { id } = await props.params;
 	const note = await getNotebyId(id);
-	return (
-		<>
-			<h1 className="text-4xl">{note.title}</h1>
-			<p className="text-lg text-gray-400">{note.content}</p>
-		</>
-	);
+
+	if (!note) {
+		return (
+			<div className="flex flex-col items-center justify-center h-full p-8 text-center text-slate-400">
+				<p className="text-sm">Note not found.</p>
+			</div>
+		);
+	}
+
+	return <NoteDetailCard note={note} />;
 }

@@ -14,13 +14,6 @@ export default async function proxy(req: NextRequest) {
 	if (isProtectedRoute && !payload?.userId) {
 		return NextResponse.redirect(new URL("/login", req.nextUrl));
 	}
-	if (
-		isPublicRoute &&
-		payload?.userId &&
-		!req.nextUrl.pathname.startsWith("/notes")
-	) {
-		return NextResponse.redirect(new URL("/notes", req.nextUrl));
-	}
 	return NextResponse.next();
 }
 
